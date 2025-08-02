@@ -28,4 +28,18 @@ app.get('/api/chronotes', async (req, res) => {
     res.status(500).json({ error: `Failed to fetch Chronotes price: ${e.message}` });
   }
 });
+// NEW: Item details endpoint (proxies to RS Grand Exchange API)
+app.get('/api/item/:id', async (req, res) => {
+  try {
+    const response = await fetch(`https://secure.runescape.com/m=itemdb_rs/api/catalogue/detail.json?item=${req.params.id}`);
+    if (!response.ok) {
+      throw new Error(`HTTP error: ${response.status} ${response.statusText}`);
+    }
+    const data = await response.json();
+    res.set('Access-Control-Allow-Origin', '*');
+    res.json(data);
+  } catch (e) {
+    res.status(500).json({ error: `Failed to fetch item details: ${e.message}` });
+  }
+});
 app.listen(process.env.PORT || 3000, () => console.log('Proxy running'));
